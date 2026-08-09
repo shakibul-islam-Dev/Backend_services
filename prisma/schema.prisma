@@ -1,12 +1,12 @@
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
-model Users {
+model User {
   id String @id @default(uuid())
   name String
   email String
@@ -18,28 +18,35 @@ model Users {
   @@map("users_table")
   @@unique([email,username])
   @@index([email,username,id])
+  orders Order[]
 }
 
-model Products{
-  Produt_id Int @id
+model Product{
+  produt_id String @id @default(uuid())
   title String
   quantity Int
   description String
   short_description String
+  stock Int
   discount_id Int
   list_price Int
   sale_price Int
   currency_type String
+  @@map("products_table")
+
 }
 model Order{
   order_id Int @id
-  customer_id Int
+  userId String
+  user User @relation(fields: [userId],references: [id])
   order_number Int
+  order_quitnty Int
   payment_id Int
   order_date DateTime
   time_stamp String
   transact_status String
   payment_date DateTime
+  @@map("Orders_table")
 }
 model Categories{
   category_id Int @id
