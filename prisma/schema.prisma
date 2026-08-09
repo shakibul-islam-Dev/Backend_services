@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+model Users {
+  id String @id @default(uuid())
+  name String
+  email String
+  username String
+  password String
+  role Role @default(USER)
+  avatar String?
+  phone String?
+  @@map("users_table")
+  @@unique([email,username])
+  @@index([email,username,id])
+}
+
+model Products{
+  Produt_id Int @id
+  title String
+  quantity Int
+  description String
+  short_description String
+  discount_id Int
+  list_price Int
+  sale_price Int
+  currency_type String
+}
+model Order{
+  order_id Int @id
+  customer_id Int
+  order_number Int
+  payment_id Int
+  order_date DateTime
+  time_stamp String
+  transact_status String
+  payment_date DateTime
+}
+model Categories{
+  category_id Int @id
+  parent_id Int
+  name String
+  subCategories Boolean
+}
+model productCategory{
+  p_category_id Int @id
+  product_id Int
+  category_id Int
+}
+model Reviews{
+  reviews_id Int @id
+  rating String
+  comment String?
+}
+enum Role{
+  USER
+  ADMIN 
+}
