@@ -1,7 +1,9 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import cors from "cors";
-import productRouter from "./services/product";
+import productRouter from "./routes/productRoute";
+import userRouter from "./routes/userRoute";
+import orderRouter from "./routes/orderRoute";
 
 const app = express();
 
@@ -15,7 +17,8 @@ app.get("/", async (req, res) => {
     message: "Congratulations Serever is running",
   });
 });
-
+app.use(userRouter);
+app.use(orderRouter);
 app.use(productRouter);
 
 export default app;

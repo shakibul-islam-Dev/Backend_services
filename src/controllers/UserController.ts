@@ -4,4 +4,4 @@ function postUser() {}
 function updateOneUser() {}
 function deleteUser() {}
 
-export default { getAllUser, getOneUser, postUser, updateOneUser, deleteUser };
+export { getAllUser, getOneUser, postUser, updateOneUser, deleteUser };
