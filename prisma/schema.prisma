@@ -9,14 +9,16 @@ datasource db {
 model User {
   id String @id @default(uuid())
   name String
-  email String
+  email String @unique
   username String
   password String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
   role Role @default(USER)
   avatar String?
   phone String?
+  adress String?
   @@map("users_table")
-  @@unique([email,username])
   @@index([email,username,id])
   orders Order[]
 }
@@ -54,16 +56,13 @@ model Categories{
   name String
   subCategories Boolean
 }
-model productCategory{
-  p_category_id Int @id
-  product_id Int
-  category_id Int
-}
+
 model Reviews{
   reviews_id Int @id
   rating String
   comment String?
 }
+
 enum Role{
   USER
   ADMIN 
