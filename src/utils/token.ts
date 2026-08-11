@@ -1,6 +1,13 @@
-import { SignJWT, jwtVerify } from "jose";
 import { env } from "../config/env";
 import { Role } from "../generated/prisma/enums";
+
+type JoseModule = typeof import("jose");
+
+let josePromise: Promise<JoseModule> | undefined;
+function getJose(): Promise<JoseModule> {
+  if (!josePromise) josePromise = import("jose");
+  return josePromise;
+}
 
 export interface TokenPayload {
   sub: string;
@@ -20,6 +27,7 @@ async function signToken(
   secret: Uint8Array,
   expiresIn: string
 ): Promise<string> {
+  const { SignJWT } = await getJose();
   return new SignJWT({ role: payload.role })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(payload.sub)
@@ -40,6 +48,7 @@ async function verifyToken(
   token: string,
   secret: Uint8Array
 ): Promise<TokenPayload> {
+  const { jwtVerify } = await getJose();
   const { payload } = await jwtVerify(token, secret);
   if (typeof payload.sub !== "string" || typeof payload.role !== "string") {
     throw new Error("Invalid token payload");

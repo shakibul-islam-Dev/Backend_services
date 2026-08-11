@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "buildCommand": "echo Build skipped - serverless function bundled by Vercel",
   "rewrites": [
     { "source": "/(.*)", "destination": "/api/index" }
   ],
