@@ -1,13 +1,27 @@
 {
   "name": "prisma-postgresql",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Production-ready REST API with Express, TypeScript, Prisma and PostgreSQL",
+  "main": "dist/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx watch src/server.ts"
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "seed": "tsx prisma/seed.ts",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio",
+    "test": "echo \"No tests configured\" && exit 0"
   },
-  "keywords": [],
+  "keywords": [
+    "express",
+    "typescript",
+    "prisma",
+    "postgresql",
+    "rest-api"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
@@ -21,11 +35,15 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "jose": "^6.2.8"
+    "express-validator": "^7.3.2",
+    "jose": "^6.2.8",
+    "pg": "^8.16.3"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/node": "^26.2.0",
+    "@types/pg": "^8.15.6",
     "prisma": "^7.9.1",
     "tsx": "^4.23.11",
     "typescript": "^7.0.2"

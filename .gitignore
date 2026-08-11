@@ -2,4 +2,11 @@ node_modules
 # Keep environment variables out of version control
 .env
 
+# Build output
+dist
+
+# Generated Prisma client lives in src/generated (committed as needed)
 /generated/prisma
+
+# Logs
+*.log

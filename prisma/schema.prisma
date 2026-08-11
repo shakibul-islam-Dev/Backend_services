@@ -6,64 +6,201 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
-model User {
-  id String @id @default(uuid())
-  name String
-  email String @unique
-  username String
-  password String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-  role Role @default(USER)
-  avatar String?
-  phone String?
-  adress String?
-  @@map("users_table")
-  @@index([email,username,id])
-  orders Order[]
-}
 
-model Product{
-  produt_id String @id @default(uuid())
-  title String
-  quantity Int
-  description String
-  short_description String
-  stock Int
-  discount_id Int
-  list_price Int
-  sale_price Int
-  currency_type String
-  @@map("products_table")
-
-}
-model Order{
-  order_id Int @id
-  userId String
-  user User @relation(fields: [userId],references: [id])
-  order_number Int
-  order_quitnty Int
-  payment_id Int
-  order_date DateTime
-  time_stamp String
-  transact_status String
-  payment_date DateTime
-  @@map("Orders_table")
-}
-model Categories{
-  category_id Int @id
-  parent_id Int
-  name String
-  subCategories Boolean
-}
-
-model Reviews{
-  reviews_id Int @id
-  rating String
-  comment String?
-}
-
-enum Role{
+enum Role {
   USER
-  ADMIN 
+  ADMIN
+  MODERATOR
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  OUT_OF_STOCK
+}
+
+enum CategoryStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id        String     @id @default(uuid())
+  name      String
+  email     String     @unique
+  username  String     @unique
+  password  String
+  role      Role       @default(USER)
+  status    UserStatus @default(ACTIVE)
+  avatar    String?
+  phone     String?
+  address   String?
+  isDeleted Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  products Product[]
+  reviews  Review[]
+  orders   Order[]
+  wishlist Wishlist[]
+
+  @@map("users")
+  @@index([email])
+  @@index([username])
+}
+
+model Category {
+  id          String         @id @default(uuid())
+  name        String
+  slug        String         @unique
+  description String?
+  parentId    String?
+  status      CategoryStatus @default(ACTIVE)
+  isDeleted   Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  parent   Category? @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryHierarchy")
+  products Product[]
+
+  @@map("categories")
+  @@index([parentId])
+  @@index([status])
+}
+
+model Product {
+  id               String        @id @default(uuid())
+  title            String
+  slug             String        @unique
+  description      String?
+  shortDescription String?
+  quantity         Int           @default(0)
+  stock            Int           @default(0)
+  listPrice        Decimal       @db.Decimal(10, 2)
+  salePrice        Decimal       @db.Decimal(10, 2)
+  currency         String        @default("USD")
+  discountPercent  Decimal?      @db.Decimal(5, 2)
+  status           ProductStatus @default(DRAFT)
+  isDeleted        Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  sellerId   String
+  categoryId String
+
+  seller     User        @relation(fields: [sellerId], references: [id])
+  category   Category    @relation(fields: [categoryId], references: [id])
+  reviews    Review[]
+  orderItems OrderItem[]
+  wishlist   Wishlist[]
+
+  @@map("products")
+  @@index([categoryId])
+  @@index([sellerId])
+  @@index([status])
+}
+
+model Review {
+  id        String       @id @default(uuid())
+  rating    Int
+  title     String?
+  comment   String?
+  status    ReviewStatus @default(PENDING)
+  isDeleted Boolean      @default(false)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  userId    String
+  productId String
+
+  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("reviews")
+  @@unique([userId, productId])
+  @@index([productId, status])
+}
+
+model Order {
+  id              String        @id @default(uuid())
+  orderNumber     Int           @unique
+  totalAmount     Decimal       @db.Decimal(10, 2)
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  shippingAddress String?
+  paymentMethod   String?
+  notes           String?
+  isDeleted       Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  userId     String
+  user       User        @relation(fields: [userId], references: [id])
+  orderItems OrderItem[]
+
+  @@map("orders")
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+  subtotal  Decimal @db.Decimal(10, 2)
+
+  orderId   String
+  productId String
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Wishlist {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  userId    String
+  productId String
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("wishlist_items")
+  @@unique([userId, productId])
+  @@index([userId])
 }
